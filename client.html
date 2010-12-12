@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
+        <script src='/socket.io/socket.io.js'></script>
+    </head>
+    <body>
+    
+    <form id='msgform'>
+        msg: <input id='msg' type='text' />
+    </form>
+    <br />
+
+    <div id='msgs'>
+    </div>
+
+    <script>
+        $('input').attr('disabled',true);
+
+        function newmsg(name,msg) {
+            $('#msgs').append(name+': '+msg+'<br/>');
+        }
+
+        var socket = new io.Socket();
+        socket.connect();
+        socket.on('connect', function(){
+            alert('CONNECTED!');
+            $('input').attr('disabled',false);
+        });
+
+        socket.on('message',function(data){
+            newmsg(data.c, data.m);
+        });
+
+        socket.on('disconnect', function() {
+            alert('DISCONNECTED!');
+            $('input').attr('disabled',true);
+        });
+
+        $('#msgform').submit( function() {
+            socket.send({'m':$('#msg').val()});
+            $('#msg').val('');
+            return false;
+        });
+    </script>
+
+    </body>
+</html>
