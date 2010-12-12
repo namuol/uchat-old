@@ -1,0 +1,72 @@
+body {
+    background: #ccc;
+    padding: 0;
+    margin: 0;
+    font-family: sans;
+    border-style: none;
+}
+
+div {
+    display: block;
+}
+
+#msg-bar {
+    position: fixed;
+    bottom: 1.5em;
+    width: 100%;
+    height: 1.5em;
+}
+
+#msg {
+    margin: 0;
+    font-size: 1.5em;
+    width: 100%;
+}
+
+#who-are-you {
+    font-size: 2.5em;
+    text-align: center;
+}
+
+#who-are-you p {
+    margin: 0;
+}
+
+#name {
+    font-size: 0.75em;
+    text-align: center;
+}
+
+input {
+    padding: 0.5em;
+    clear: both;
+    outline-width: 0;
+    border-width: 0;
+    background: #ddd;
+}
+
+input:focus {
+    background: #fff;
+}
+
+input[disabled='disabled'] {
+    background: #ccc;
+    color: #555;
+}
+
+.msg-name {
+    font-weight: bold;
+}
+
+#msgs {
+    background: #ccc;
+    list-style-type: none;
+    overflow: hidden;
+    padding: 0.5em;
+    padding-bottom: 2.0em;
+}
+
+body.disabled {
+    background: #ccc;
+    color: #555;
+}

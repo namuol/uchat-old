@@ -2,46 +2,106 @@
     <head>
         <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
         <script src='/socket.io/socket.io.js'></script>
+        <script src='http://jtemplates.tpython.com/jquery-jtemplates.js'></script>
+        <link rel='stylesheet' type='text/css' href='/client.css' />
     </head>
     <body>
-    
-    <form id='msgform'>
-        msg: <input id='msg' type='text' />
-    </form>
-    <br />
+        <div>
+            <div id='who-are-you'>
+                <p>who are you?</p>
+                <form id='join-form'>
+                    <input id='name' type='text' />
+                </form>
+            </div>
 
-    <div id='msgs'>
-    </div>
+            <div id='chat-panel' class='disabled' style='display: none'> 
+                <div>
+                    <ul id='msgs'>
+                    </ul>
+                </div>
 
-    <script>
-        $('input').attr('disabled',true);
+                <div id='msg-bar'>
+                    <form id='msg-form'>
+                        <input id='msg' type='text' />
+                    </form>
+                </div>
 
-        function newmsg(name,msg) {
-            $('#msgs').append(name+': '+msg+'<br/>');
-        }
+            </div>
+            
+            <textarea id='joined-jtpl' style='display:none'>
+                <li><span class='joined'>{$T.name} joined</span></li>
+            </textarea>
 
-        var socket = new io.Socket();
-        socket.connect();
-        socket.on('connect', function(){
-            alert('CONNECTED!');
-            $('input').attr('disabled',false);
-        });
+            <textarea id='left-jtpl' style='display:none'>
+                <li><span class='left'>{$T.name} left</span></li>
+            </textarea>
 
-        socket.on('message',function(data){
-            newmsg(data.c, data.m);
-        });
+            <textarea id='msg-jtpl' style='display:none'>
+                <li><span class='msg'><span class='msg-name'>{$T.name}</span>: {$T.msg}</span></li>
+            </textarea>
+        </div>
+        <script type='text/javascript'>
+            /////////////////////////////////////////
+            // SOCKET.IO
+            var socket = new io.Socket();
 
-        socket.on('disconnect', function() {
-            alert('DISCONNECTED!');
-            $('input').attr('disabled',true);
-        });
+            socket.on('connect', function(){
+                $('input').attr('disabled',false);
+            });
 
-        $('#msgform').submit( function() {
-            socket.send({'m':$('#msg').val()});
-            $('#msg').val('');
-            return false;
-        });
-    </script>
+            socket.on('message',function(data){
+                switch(data.type) {
+                case 'joined':
+                case 'left':
+                case 'msg':
+                    jtpl = jQuery.createTemplate($('#'+data.type+'-jtpl').val());
+                    txt = jQuery.processTemplateToText(jtpl, data);
+                    $('#msgs').append(txt);
+
+                    window.scrollBy(0,99999999999999);
+                    $('#msg').focus();
+                    break;
+                }
+            });
+
+            socket.on('disconnect', function() {
+                $('input').attr('disabled',true);
+            });
+
+            socket.connect();
+            // SOCKET.IO
+            /////////////////////////////////////////
+
+            /////////////////////////////////////////
+            // UI BEHAVIOR
+            $('#name').focus();
+            $('#msg').attr('disabled',true);
+
+            $('#join-form').submit( function() {
+                socket.send({
+                    type: 'join',
+                    name: $('#name').val()
+                });
+
+                $('#who-are-you').hide();
+                $('#chat-panel').show();
+                return false;
+            });
+
+            $('#msg-form').submit( function() {
+                socket.send({
+                    type: 'msg',
+                    msg: $('#msg').val()
+                });
+
+                $('#msg').val('');
+                return false;
+            });
+
+            // UI BEHAVIOR
+            /////////////////////////////////////////
+
+        </script>
 
     </body>
 </html>
