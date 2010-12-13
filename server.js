@@ -15,10 +15,15 @@ function readClientHTML() {
     return fs.readFileSync('client.html', 'utf8');
 }
 
-clientHTML = readClientHTML();
+var clientHTML = readClientHTML();
 
 fs.watchFile('client.html', function(current, previous) {
-    clientHTML = readClientHTML();
+    try {
+        clientHTML = readClientHTML();
+    } catch(e) {
+        console.log('Problem reading client.html! Keeping old file!');
+        console.log(e);
+    }
 });
 
 var baseServer = http.createServer(function(req, res) {
@@ -49,6 +54,8 @@ function broadcast(data) {
         log = _.tail(log);
     }
 
+    data.time = (new Date()).getTime();
+
     clients.forEach(function(c,index,array) {
         c.send(data);
     });
@@ -62,10 +69,11 @@ socket.on('connection', function(client) {
     client.on('message', function(data) {
         switch(data.type) {
         case 'join':
+            // Ignore clients that have already joined:
             if(_.indexOf(clients, client) != -1)
                 break;
 
-            client.index = clients.push(client);
+            clients.push(client);
             client.name = data.name;
             broadcast({
                 type: 'joined',
@@ -80,7 +88,7 @@ socket.on('connection', function(client) {
                 name: client.name,
                 msg: data.msg
             });
-            data.name = client.name;
+
             console.log(client.name + ': ' + data.msg);
             break;
         }
@@ -96,7 +104,6 @@ socket.on('connection', function(client) {
             });
             console.log(client.name + ' left');
         }
-
     });
 });
 // END Socket.IO setup ///////////////////////////////////

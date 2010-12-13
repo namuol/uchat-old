@@ -6,46 +6,50 @@
         <link rel='stylesheet' type='text/css' href='/client.css' />
     </head>
     <body>
-        <div>
-            <div id='who-are-you'>
-                <p>who are you?</p>
-                <form id='join-form'>
-                    <input id='name' type='text' />
+        <div id='status-msg'>
+        </div>
+
+        <form id='join-form'>
+            <input id='name' type='text' />
+        </form>
+
+        <div id='chat-panel' class='disabled' style='display: none'> 
+            <div>
+                <ul id='msgs'>
+                </ul>
+            </div>
+
+            <div id='msg-bar'>
+                <form id='msg-form'>
+                    <input id='msg' type='text' />
                 </form>
             </div>
 
-            <div id='chat-panel' class='disabled' style='display: none'> 
-                <div>
-                    <ul id='msgs'>
-                    </ul>
-                </div>
-
-                <div id='msg-bar'>
-                    <form id='msg-form'>
-                        <input id='msg' type='text' />
-                    </form>
-                </div>
-
-            </div>
-            
-            <textarea id='joined-jtpl' style='display:none'>
-                <li><span class='joined'>{$T.name} joined</span></li>
-            </textarea>
-
-            <textarea id='left-jtpl' style='display:none'>
-                <li><span class='left'>{$T.name} left</span></li>
-            </textarea>
-
-            <textarea id='msg-jtpl' style='display:none'>
-                <li><span class='msg'><span class='msg-name'>{$T.name}</span>: {$T.msg}</span></li>
-            </textarea>
         </div>
+        
+        <textarea id='joined-jtpl' style='display:none'>
+            <li><span class='timestamp'>{timeString($T.time)}</span><span class='joined-name'>{$T.name}</span><span class='joined'>joined</span></li>
+        </textarea>
+
+        <textarea id='left-jtpl' style='display:none'>
+            <li><span class='timestamp'>{timeString($T.time)}</span><span class='left-name'>{$T.name}</span><span class='left'>left</span></li>
+        </textarea>
+
+        <textarea id='msg-jtpl' style='display:none'>
+            <li><span class='timestamp'>{timeString($T.time)}</span><span class='msg-name'>{$T.name}</span><span class='msg'>{$T.msg}</span></li>
+        </textarea>
         <script type='text/javascript'>
             /////////////////////////////////////////
             // SOCKET.IO
             var socket = new io.Socket();
+            $('#join-form').hide();
+            $('#status-msg').html('connecting...');
 
             socket.on('connect', function(){
+                $('#status-msg').html('who are you?');
+                $('#status-msg').show();
+                $('#join-form').show();
+                $('#name').focus();
                 $('input').attr('disabled',false);
             });
 
@@ -65,7 +69,10 @@
             });
 
             socket.on('disconnect', function() {
-                $('input').attr('disabled',true);
+                $('#status-msg').html('error/disconnected :(');
+                $('#status-msg').show();
+                $('input').attr('disabled','disabled');
+                $('body').addClass('disabled');
             });
 
             socket.connect();
@@ -74,6 +81,18 @@
 
             /////////////////////////////////////////
             // UI BEHAVIOR
+            
+            function timeString(time) {
+                d = new Date(time);
+                h = d.getHours();
+                h = h < 10 ? "0" + h : h;
+                m = d.getMinutes();
+                m = m < 10 ? "0" + m : m;
+                s = d.getSeconds();
+                s = s < 10 ? "0" + s : s;
+                return h + ":" + m + ":" + s;
+            }
+
             $('#name').focus();
             $('#msg').attr('disabled',true);
 
@@ -82,8 +101,8 @@
                     type: 'join',
                     name: $('#name').val()
                 });
-
-                $('#who-are-you').hide();
+                $('#status-msg').hide();
+                $('#join-form').hide();
                 $('#chat-panel').show();
                 return false;
             });

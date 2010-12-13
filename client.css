@@ -6,30 +6,36 @@ body {
     border-style: none;
 }
 
-div {
-    display: block;
-}
-
 #msg-bar {
     position: fixed;
-    bottom: 1.5em;
+    margin: 0;
+    bottom: 0;
     width: 100%;
-    height: 1.5em;
 }
 
 #msg {
-    margin: 0;
     font-size: 1.5em;
     width: 100%;
 }
 
-#who-are-you {
+#status-msg {
+    margin: 0;
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
     font-size: 2.5em;
+    background: #999;
     text-align: center;
+    float: left;
+    left: 0;
+    width: 100%;
+    color: #ddd;
+    position: fixed;
 }
 
-#who-are-you p {
-    margin: 0;
+#join-form {
+    padding-top: 2.5em;
+    font-size: 2.5em;
+    text-align: center;
 }
 
 #name {
@@ -37,7 +43,12 @@ div {
     text-align: center;
 }
 
+form {
+    margin: 0;
+}
+
 input {
+    margin: 0;
     padding: 0.5em;
     clear: both;
     outline-width: 0;
@@ -54,19 +65,37 @@ input[disabled='disabled'] {
     color: #555;
 }
 
-.msg-name {
-    font-weight: bold;
-}
 
 #msgs {
+    margin: 0;
     background: #ccc;
     list-style-type: none;
     overflow: hidden;
     padding: 0.5em;
-    padding-bottom: 2.0em;
+    padding-bottom: 3.5em;
+}
+
+#msgs li {
+    line-height: 1.4em;
 }
 
 body.disabled {
     background: #ccc;
     color: #555;
 }
+
+.timestamp {
+    color: #888;
+    padding-right: 0.5em;
+}
+
+.joined-name, .left-name {
+    font-style: italic;
+    padding-right: 0.5em;
+}
+
+.msg-name {
+    font-weight: bold;
+    padding-right: 0.66em;
+}
+
