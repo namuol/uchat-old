@@ -3,6 +3,7 @@
         <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
         <script src='/socket.io/socket.io.js'></script>
         <script src='http://jtemplates.tpython.com/jquery-jtemplates.js'></script>
+        <script src='underscore.js'></script>
         <link rel='stylesheet' type='text/css' href='/client.css' />
     </head>
     <body>
@@ -38,6 +39,11 @@
         <textarea id='msg-jtpl' style='display:none'>
             <li><span class='timestamp'>{timeString($T.time)}</span><span class='msg-name'>{$T.name}</span><span class='msg'>{$T.msg}</span></li>
         </textarea>
+
+        <textarea id='cmd-jtpl' style='display:none'>
+            <li class='cmd-msg'>{$T.msg}</li>
+        </textarea>
+
         <script type='text/javascript'>
             /////////////////////////////////////////
             // SOCKET.IO
@@ -61,8 +67,8 @@
                     jtpl = jQuery.createTemplate($('#'+data.type+'-jtpl').val());
                     txt = jQuery.processTemplateToText(jtpl, data);
                     $('#msgs').append(txt);
-
-                    window.scrollBy(0,99999999999999);
+                    
+                    $('#msgs')[0].scrollTop = $('#msgs')[0].scrollHeight;
                     $('#msg').focus();
                     break;
                 }
@@ -81,7 +87,12 @@
 
             /////////////////////////////////////////
             // UI BEHAVIOR
-            
+            var msgHistory = [];
+            var msgHistoryPos = 0;
+            var currentMsg = '';
+
+            $('#msg').attr('autocomplete','off');
+
             function timeString(time) {
                 d = new Date(time);
                 h = d.getHours();
@@ -107,14 +118,89 @@
                 return false;
             });
 
+            function userError(msg) {
+                alert(msg);
+            };
+
+            function userMsg(msg) {
+                
+            };
+
+            var commands = {
+                help: {
+                    usage:  "help - list all available commands",
+                    func: function() {
+                    }
+                },
+                timestamps: {
+                    usage: "timestamps on|off - toggle timestamp visibility",
+                    func: function(onOrOff) {
+                        if(onOrOff == 'on') {
+                            $('.timestamp').show();
+                        } else if(onOrOff == 'off') {
+                            $('#msgs').addClass('timestamps-off');
+                        } else {
+                            userError('Use "on" or "off"');
+                        }
+                    }
+                }
+            };
+
             $('#msg-form').submit( function() {
-                socket.send({
-                    type: 'msg',
-                    msg: $('#msg').val()
-                });
+                var msg = $('#msg').val();
+
+                if(msg[0] == '/') {
+                    var cmd = msg.substring(1);
+                    var cmdName = cmd.split(' ')[0];
+                    var evalCmd1 = 'typeof(commands.' + $.trim(cmdName) + ')';
+                    var evalCmd2 = 'typeof(commands.' + $.trim(cmdName) + '.func)';
+                    if(eval(evalCmd1) === 'object' && 
+                       eval(evalCmd2) === 'function') {
+                        var cmdString = 'commands.' + cmdName + '.func(';
+                        var args = _.without(_.rest(cmd.split(' ')),'').map(function(n) {
+                            return '"'+n+'"';
+                        });
+                        cmdString += args.join(',')
+                        cmdString += ');'
+                        eval(cmdString);
+                    } else { 
+                        userError('Unknown command: ' + cmd);
+                    }
+                } else {
+                    socket.send({
+                        type: 'msg',
+                        msg: msg
+                    });
+                }
+                
+                msgHistoryPos = msgHistory.push(msg);
 
                 $('#msg').val('');
                 return false;
+            });
+
+            $('#msg').keydown(function(e) {
+                switch(e.keyCode) {
+                case 38: // UP
+                    if(msgHistoryPos >= msgHistory.length) {
+                        currentMsg = $('#msg').val();
+                    }
+                    msgHistoryPos = msgHistoryPos <= 0 ? 0 : msgHistoryPos - 1;
+                    $('#msg').val(msgHistory[msgHistoryPos]);
+                    break;
+                case 40: // DOWN
+                    if(msgHistoryPos <= msgHistory.length) {
+                        msgHistoryPos = msgHistoryPos >= msgHistory.length
+                            ? msgHistory.length
+                            : msgHistoryPos + 1;
+                        $('#msg').val(msgHistory[msgHistoryPos]);
+                    } else {
+                        $('#msg').val(currentMsg);
+                    }
+                    break;
+                default:
+                    currentMsg = $('#msg').val();
+                } 
             });
 
             // UI BEHAVIOR

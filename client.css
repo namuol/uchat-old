@@ -48,12 +48,13 @@ form {
 }
 
 input {
-    margin: 0;
-    padding: 0.5em;
-    clear: both;
-    outline-width: 0;
-    border-width: 0;
     background: #ddd;
+    border-width: 0;
+    clear: both;
+    height: 48pt;
+    margin: 0;
+    outline-width: 0;
+    padding: 0.5em;
 }
 
 input:focus {
@@ -65,14 +66,18 @@ input[disabled='disabled'] {
     color: #555;
 }
 
-
 #msgs {
-    margin: 0;
-    background: #ccc;
+    background: none repeat scroll 0 0 #CCCCCC;
+    bottom: 48pt;
+    left: 0;
     list-style-type: none;
-    overflow: hidden;
-    padding: 0.5em;
-    padding-bottom: 3.5em;
+    margin: 0;
+    overflow: auto;
+    padding-bottom: 0;
+    padding-left: 0.125em;
+    position: fixed;
+    right: 0;
+    top: 0;
 }
 
 #msgs li {
@@ -87,6 +92,10 @@ body.disabled {
 .timestamp {
     color: #888;
     padding-right: 0.5em;
+}
+
+#msgs.timestamps-off li .timestamp {
+    display: none;
 }
 
 .joined-name, .left-name {
