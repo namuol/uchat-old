@@ -123,20 +123,28 @@
             };
 
             function userMsg(msg) {
+                var jtpl = jQuery.createTemplate($('#cmd-jtpl').val());
+                var txt = jQuery.processTemplateToText(jtpl, {msg:msg});
+                $('#msgs').append(txt);
                 
+                $('#msgs')[0].scrollTop = $('#msgs')[0].scrollHeight;
+                $('#msg').focus();
             };
 
             var commands = {
                 help: {
                     usage:  "help - list all available commands",
                     func: function() {
+                        for(var key in commands) {
+                            userMsg(commands[key].usage);
+                        };
                     }
                 },
                 timestamps: {
                     usage: "timestamps on|off - toggle timestamp visibility",
                     func: function(onOrOff) {
                         if(onOrOff == 'on') {
-                            $('.timestamp').show();
+                            $('#msgs').removeClass('timestamps-off');
                         } else if(onOrOff == 'off') {
                             $('#msgs').addClass('timestamps-off');
                         } else {

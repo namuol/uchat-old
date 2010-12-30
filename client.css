@@ -108,3 +108,7 @@ body.disabled {
     padding-right: 0.66em;
 }
 
+.cmd-msg {
+    text-decoration: italic;
+    color: #555;
+}
