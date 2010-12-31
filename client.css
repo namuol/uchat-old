@@ -4,7 +4,7 @@ body {
     margin: 0;
     font-family: sans;
     border-style: none;
-    font-family: 'Droid Sans Mono', 'DejaVu sans Mono', 'Lucida Typewriter', 'Courier New';
+    font-family: 'Droid Sans Mono','DejaVu Sans Mono', 'Courier New';
 }
 
 #msg-bar {
